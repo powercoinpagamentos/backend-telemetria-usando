@@ -32,36 +32,6 @@ clientRoutes.post("/cliente", verifyJWTPessoa, async (req: any, res) => {
     }
 });
 
-clientRoutes.put("/cliente", verifyJWTPessoa, async (req: any, res) => {
-    try {
-        req.body.pessoaId = req.userId;
-        const clienteAtualizado = await prismaClient.pix_Cliente.update({
-            where: {
-                id: req.body.id,
-            },
-            data: {
-                nome: req.body.nome,
-                mercadoPagoToken: req.body.mercadoPagoToken,
-                dataVencimento: req.body.dataVencimento,
-                pagbankToken: req.body.pagbankToken,
-                pagbankEmail: req.body.pagbankEmail,
-                cellphone: req.body.cellphone,
-            },
-            select: {
-                id: true,
-                nome: true,
-                mercadoPagoToken: false,
-                dataVencimento: true,
-                cellphone: true,
-            },
-        });
-        return res.json(clienteAtualizado);
-    } catch (err: any) {
-        console.log(err);
-        return res.status(500).json({error: `>>:${err.message}`});
-    }
-});
-
 clientRoutes.delete('/cliente/:id', verifyJWTPessoa, async (req, res) => {
     const clienteId = req.params.id;
 
@@ -85,44 +55,6 @@ clientRoutes.delete('/cliente/:id', verifyJWTPessoa, async (req, res) => {
     } catch (error) {
         console.error('Erro ao excluir o cliente:', error);
         res.status(500).json({ error: 'Erro ao excluir o cliente' });
-    }
-});
-
-clientRoutes.put('/alterar-cliente-adm-new/:id', async (req, res) => {
-    const { id } = req.params;
-    const { nome, mercadoPagoToken, pagbankToken, dataVencimento, pagbankEmail, cellphone } = req.body;
-
-    try {
-        const updatedCliente = await prismaClient.pix_Cliente.update({
-            where: { id },
-            data: {
-                nome,
-                mercadoPagoToken,
-                pagbankToken,
-                pagbankEmail,
-                dataVencimento,
-                cellphone
-            },
-        });
-
-        const protectedCliente = { ...updatedCliente };
-
-        if (protectedCliente.mercadoPagoToken) {
-            protectedCliente.mercadoPagoToken = protectedCliente.mercadoPagoToken.slice(-3).padStart(protectedCliente.mercadoPagoToken.length, '*');
-        }
-
-        if (protectedCliente.pagbankToken) {
-            protectedCliente.pagbankToken = protectedCliente.pagbankToken.slice(-3).padStart(protectedCliente.pagbankToken.length, '*');
-        }
-
-        if (protectedCliente.senha) {
-            protectedCliente.senha = '***';
-        }
-
-        res.json(protectedCliente);
-    } catch (error) {
-        console.error('Erro ao alterar o cliente:', error);
-        res.status(500).json({ "message": 'Erro ao alterar o cliente' });
     }
 });
 
@@ -182,7 +114,75 @@ clientRoutes.put("/cliente-trocar-senha", verifyJWTPessoa, async (req: any, res)
     }
 });
 
-clientRoutes.get("/clientes", verifyJWTPessoa, async (req: any, res) => {
+clientRoutes.put("/cliente", verifyJWTPessoa, async (req: any, res) => { // PGBANK AQUI
+    try {
+        req.body.pessoaId = req.userId;
+        const clienteAtualizado = await prismaClient.pix_Cliente.update({
+            where: {
+                id: req.body.id,
+            },
+            data: {
+                nome: req.body.nome,
+                mercadoPagoToken: req.body.mercadoPagoToken,
+                dataVencimento: req.body.dataVencimento,
+                pagbankToken: req.body.pagbankToken,
+                pagbankEmail: req.body.pagbankEmail,
+                cellphone: req.body.cellphone,
+            },
+            select: {
+                id: true,
+                nome: true,
+                mercadoPagoToken: false,
+                dataVencimento: true,
+                cellphone: true,
+            },
+        });
+        return res.json(clienteAtualizado);
+    } catch (err: any) {
+        console.log(err);
+        return res.status(500).json({error: `>>:${err.message}`});
+    }
+});
+
+clientRoutes.put('/alterar-cliente-adm-new/:id', async (req, res) => { // PGBANK AQUI
+    const { id } = req.params;
+    const { nome, mercadoPagoToken, pagbankToken, dataVencimento, pagbankEmail, cellphone } = req.body;
+
+    try {
+        const updatedCliente = await prismaClient.pix_Cliente.update({
+            where: { id },
+            data: {
+                nome,
+                mercadoPagoToken,
+                pagbankToken,
+                pagbankEmail,
+                dataVencimento,
+                cellphone
+            },
+        });
+
+        const protectedCliente = { ...updatedCliente };
+
+        if (protectedCliente.mercadoPagoToken) {
+            protectedCliente.mercadoPagoToken = protectedCliente.mercadoPagoToken.slice(-3).padStart(protectedCliente.mercadoPagoToken.length, '*');
+        }
+
+        if (protectedCliente.pagbankToken) {
+            protectedCliente.pagbankToken = protectedCliente.pagbankToken.slice(-3).padStart(protectedCliente.pagbankToken.length, '*');
+        }
+
+        if (protectedCliente.senha) {
+            protectedCliente.senha = '***';
+        }
+
+        res.json(protectedCliente);
+    } catch (error) {
+        console.error('Erro ao alterar o cliente:', error);
+        res.status(500).json({ "message": 'Erro ao alterar o cliente' });
+    }
+});
+
+clientRoutes.get("/clientes", verifyJWTPessoa, async (req: any, res) => { // PGBANK AQUI
     console.log(`${req.userId} acessou a rota que busca todos os clientes e suas máquinas.`);
     try {
         const clientesComMaquinas = await prismaClient.pix_Cliente.findMany({
@@ -238,7 +238,7 @@ clientRoutes.get("/clientes", verifyJWTPessoa, async (req: any, res) => {
     }
 });
 
-clientRoutes.get("/cliente", verifyJWTPessoa, async (req: any, res) => {
+clientRoutes.get("/cliente", verifyJWTPessoa, async (req: any, res) => {  // PGBANK AQUI
     console.log('[ADM]: Obtendo cliente ' + req.query.id);
     try {
         const clienteComMaquinas = await prismaClient.pix_Cliente.findFirst({

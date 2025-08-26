@@ -31,7 +31,7 @@ webHooksRoutes.post("/webhookmercadopago/:id", async (req: any, res: any) => {
     }
 });
 
-webHooksRoutes.post('/webhookpagbank/:idCliente', async (req: any, res: any) => {
+webHooksRoutes.post('/webhookpagbank/:idCliente', async (req: any, res: any) => { // PAGBANK AQUI
     try {
         const PAGSEGURO_API_URL = 'https://ws.pagseguro.uol.com.br/v3/transactions/notifications';
 
