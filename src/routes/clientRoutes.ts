@@ -83,50 +83,6 @@ clientRoutes.put("/cliente-sem-token", verifyJWTPessoa, async (req: any, res) =>
         return res.status(500).json({ error: `>>:${err.message}` });
     }
 });
-// ROTA PARA RESETAR SENHA VIA CURL - ACESSO ADMIN
-clientRoutes.post("/reset-senha-adm", async (req, res) => {
-    try {
-        const { email, novaSenha } = req.body;
-
-        if (!email || !novaSenha) {
-            return res.status(400).json({
-                error: "É necessário enviar email e novaSenha"
-            });
-        }
-
-        // verifica se o cliente existe
-        const cliente = await prismaClient.pix_Cliente.findUnique({
-            where: { email }
-        });
-
-        if (!cliente) {
-            return res.status(404).json({ error: "Cliente não encontrado" });
-        }
-
-        // gera hash
-        const salt = await bcrypt.genSalt(10);
-        const senhaHash = await bcrypt.hash(novaSenha, salt);
-
-        // atualiza no banco
-        await prismaClient.pix_Cliente.update({
-            where: { email },
-            data: { senha: senhaHash }
-        });
-
-        return res.json({
-            status: "OK",
-            mensagem: `Senha alterada para o cliente ${email}`,
-            novaSenha
-        });
-
-    } catch (err: any) {
-        console.error("Erro reset-senha-adm:", err);
-        return res.status(500).json({
-            error: "Erro interno ao resetar senha",
-            message: err.message
-        });
-    }
-});
 
 clientRoutes.put("/cliente-trocar-senha", verifyJWTPessoa, async (req: any, res) => {
     let novaSenha = "";
